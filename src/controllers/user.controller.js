@@ -4,6 +4,7 @@ import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 const generateAccessTokenAndRefreshToken = async (userId) => {
   try {
@@ -242,7 +243,7 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "Password Changed Successfully"));
 });
 
-const getCurrentuser = asyncHandler(async (req, res) => {
+const getCurrentUser = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, req.user, "current user fetch successfully"));
@@ -270,7 +271,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     .json(new ApiResponse(), user, "Account details updated successfully");
 });
 
-const updateAvatar = asyncHandler(async (req, res) => {
+const updateUserAvatar = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;
 
   if (!avatarLocalPath) {
@@ -296,7 +297,7 @@ const updateAvatar = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, user, "Avatar Updated successfully"));
 });
-const updateCoverImage = asyncHandler(async (req, res) => {
+const updateUserCoverImage = asyncHandler(async (req, res) => {
   const coverImageLocalPath = req.file?.path;
 
   if (!coverImageLocalPath) {
@@ -391,14 +392,69 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     );
 });
 
+const getWatchHistory = asyncHandler(async (req, res) => {
+  const user = await User.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(req.user._id),
+      },
+    },
+    {
+      $lookup: {
+        from: "videos",
+        localField: "watchHistory",
+        foreignField: "_id",
+        as: "WatchHistory",
+        pipeline: [
+          {
+            $lookup: {
+              from: "users",
+              localField: "owner",
+              foreignField: "_id",
+              as: "owner",
+              pipeline: [
+                {
+                  $project: {
+                    fullName: 1,
+                    username: 1,
+                    avatar: 1,
+                  },
+                },
+              ],
+            },
+          },
+          {
+            $addFields: {
+              owner: {
+                $first: "$owner",
+              },
+            },
+          },
+        ],
+      },
+    },
+  ]);
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        user[0].watchHistory,
+        "Watch History fetched successfully"
+      )
+    );
+});
 export {
   registerUser,
   loginUser,
   logoutUser,
   refreshAccessToken,
   changeCurrentPassword,
-  getCurrentuser,
-  updateAvatar,
-  updateCoverImage,
+  getCurrentUser,
+  updateAccountDetails,
+  updateUserAvatar,
+  updateUserCoverImage,
   getUserChannelProfile,
+  getWatchHistory,
 };
