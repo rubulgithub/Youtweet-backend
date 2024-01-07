@@ -122,7 +122,7 @@ const loginUser = asyncHandler(async (req, res) => {
   //access and refresh token
 
   const { refreshToken, accessToken } =
-    await generateAccessTokenANDRefreshToken(user._id);
+    await generateAccessTokenAndRefreshToken(user._id);
 
   //send cookies
   const loggedInUser = await User.findById(user._id).select(
@@ -155,8 +155,8 @@ const logoutUser = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(
     req.user._id,
     {
-      $set: {
-        refreshToken: undefined,
+      $unset: {
+        refreshToken: 1,
       },
     },
     {
@@ -330,7 +330,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     throw new ApiError(400, "username is missing");
   }
 
-  const channel = User.aggregate([
+  const channel = await User.aggregate([
     {
       $match: {
         username: username?.toLowerCase(),
@@ -374,8 +374,8 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
         fullname: 1,
         username: 1,
         subscribersCount: 1,
-        channelsSubscribedToCount,
-        isSubscribed,
+        channelsSubscribedToCount: 1,
+        isSubscribed: 1,
         avatar: 1,
         coverImage: 1,
         email: 1,
