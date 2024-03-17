@@ -298,6 +298,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, user, "Avatar Updated successfully"));
 });
+
 const updateUserCoverImage = asyncHandler(async (req, res) => {
   const coverImageLocalPath = req.file?.path;
 
@@ -372,7 +373,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     },
     {
       $project: {
-        fullname: 1,
+        fullName: 1,
         username: 1,
         subscribersCount: 1,
         channelsSubscribedToCount: 1,

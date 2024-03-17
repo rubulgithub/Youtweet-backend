@@ -3,23 +3,25 @@ import { Comment } from "../models/comment.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { Video } from "../models/video.model.js";
 
-//get all comments for a video
+// get all comments for a video
 const getVideoComments = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   const { page = 1, limit = 10 } = req.query;
+  // console.log("Video ID:", videoId);
 
   if (!isValidObjectId(videoId)) {
-    throw new ApiError(400, "Invalid Video id");
+    throw new ApiError(400, "Invalid video Id");
   }
 
-  const video = await Comment.findById(videoId);
+  const video = await Video.findById(videoId);
 
   if (!video) {
     throw new ApiError(404, "Video not found");
   }
 
-  const CommentAggregate = await Comment.aggregate([
+  const commentsAggregate = Comment.aggregate([
     {
       $match: {
         video: new mongoose.Types.ObjectId(videoId),
@@ -30,7 +32,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
         from: "users",
         localField: "owner",
         foreignField: "_id",
-        as: "ownerInfo",
+        as: "owner",
       },
     },
     {
@@ -71,7 +73,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
         owner: {
           username: 1,
           fullName: 1,
-          "avatar.url": 1,
+          avatar: 1,
         },
         isLiked: 1,
       },
@@ -83,7 +85,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
     limit: parseInt(limit, 10),
   };
 
-  const comments = await Comment.aggregatePaginate(CommentAggregate, options);
+  const comments = await Comment.aggregatePaginate(commentsAggregate, options);
 
   return res
     .status(200)
