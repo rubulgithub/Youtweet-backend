@@ -403,7 +403,7 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
     videoId,
     {
       $set: {
-        isPublished: !video?.isPublished,
+        isPublish: !video?.isPublish,
       },
     },
     { new: true }
@@ -418,7 +418,7 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
     .json(
       new ApiResponse(
         200,
-        { isPublished: toggledVideoPublish.isPublished },
+        { isPublish: toggledVideoPublish.isPublish },
         "Video publish toggled successfully"
       )
     );

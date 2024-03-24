@@ -406,7 +406,7 @@ const getWatchHistory = asyncHandler(async (req, res) => {
         from: "videos",
         localField: "watchHistory",
         foreignField: "_id",
-        as: "WatchHistory",
+        as: "watchHistory",
         pipeline: [
           {
             $lookup: {
@@ -443,10 +443,11 @@ const getWatchHistory = asyncHandler(async (req, res) => {
       new ApiResponse(
         200,
         user[0].watchHistory,
-        "Watch History fetched successfully"
+        "Watch history fetched successfully"
       )
     );
 });
+
 export {
   registerUser,
   loginUser,
