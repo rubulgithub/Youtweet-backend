@@ -9,7 +9,8 @@ import { User } from "../models/user.model.js";
 // get all videos based on query, sort, pagination
 const getAllVideos = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
-  // console.log(userId);
+  console.log("userId", userId);
+  console.log("query", query);
   const pipeline = [];
 
   // for using Full Text based search u need to create a search index in mongoDB atlas
@@ -67,7 +68,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
           {
             $project: {
               username: 1,
-              avatar: 1,
+              "avatar.url": 1,
             },
           },
         ],
@@ -424,6 +425,38 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
     );
 });
 
+//Get all the video belongs to a user
+const getUserVideos = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+
+  if (!isValidObjectId(userId)) {
+    new ApiError(400, "invalid userid");
+  }
+
+  const user = await User.findById(userId);
+  if (!user) {
+    new ApiError(404, "user not found");
+  }
+
+  const userVideos = await Video.aggregate([
+    {
+      $match: {
+        owner: new mongoose.Types.ObjectId(userId),
+      },
+    },
+  ]);
+
+  if (!userVideos) {
+    new ApiError(500, "Something went wrong ,please try again");
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, userVideos, "User videos fectched successfully")
+    );
+});
+
 export {
   getAllVideos,
   publishAVideo,
@@ -431,4 +464,5 @@ export {
   updateVideo,
   deleteVideo,
   togglePublishStatus,
+  getUserVideos,
 };

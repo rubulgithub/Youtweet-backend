@@ -5,6 +5,7 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 import {
   deleteVideo,
   getAllVideos,
+  getUserVideos,
   getVideoById,
   publishAVideo,
   togglePublishStatus,
@@ -15,7 +16,7 @@ const router = Router();
 
 router
   .route("/")
-  .get(verifyJWT, getAllVideos)
+  .get(getAllVideos)
   .post(
     verifyJWT,
     upload.fields([
@@ -37,6 +38,7 @@ router
   .delete(verifyJWT, deleteVideo)
   .patch(verifyJWT, upload.single("thumbnail"), updateVideo);
 
+router.route("/user/:userId").get(verifyJWT, getUserVideos);
 router.route("/toggle/publish/:videoId").patch(verifyJWT, togglePublishStatus);
 
 export default router;
