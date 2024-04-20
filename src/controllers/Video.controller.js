@@ -9,8 +9,8 @@ import { User } from "../models/user.model.js";
 // get all videos based on query, sort, pagination
 const getAllVideos = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
-  console.log("userId", userId);
-  console.log("query", query);
+  // console.log("userId", userId);
+  // console.log("query", query);
   const pipeline = [];
 
   // for using Full Text based search u need to create a search index in mongoDB atlas
