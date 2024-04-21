@@ -8,7 +8,7 @@
     "node": "18.x"
   },
   "scripts": {
-    "dev": "nodemon -r dotenv/config --experimental-json-modules src/index.js"
+    "dev": "node src/index.js"
   },
   "keywords": [
     "javaScript",
